@@ -18,3 +18,11 @@ for item in items:
 
 frequent_itemsets = eclat_instance.get_frequent()
 print("Frequent Itemsets:", frequent_itemsets)
+
+
+eclat_instance.association_representation()
+
+confidence_values = eclat_instance.calculate_confidence()
+print("Confidence Values:")
+for antecedent, consequent, confidence in confidence_values:
+    print(f"Antecedent: {antecedent}, Consequent: {consequent}, Confidence: {confidence}")

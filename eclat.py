@@ -33,4 +33,27 @@ class Eclat:
         self.fit()
         return self.frequent_items
 
+    def calculate_confidence(self):
+        confidence_values = []  
 
+        for items, tids in frequent_items:
+            if len(items) == 1:
+                continue  
+        for antecedent in items:
+            consequent = items - {antecedent}
+            antecedent_tids = self.vertical_items[antecedent]
+            consequent_tids = self.vertical_items[frozenset(consequent)]
+            intersection = antecedent_tids.intersection(consequent_tids)
+            confidence = len(intersection) / len(antecedent_tids) if len(antecedent_tids) > 0 else 0
+            confidence_values.append((({antecedent}), (consequent), confidence))
+        return confidence_values
+    
+    def association_representation(self):
+        association_rules = []
+        for items, tids in self.frequent_items:
+            if len(items) > 1:
+                for antecedent in items:
+                    consequent = items - {antecedent}
+                    antecedent_tids = self.vertical_items[antecedent]
+                    consequent_tids = self.vertical_items[(consequent)]
+                    print(f"{antecedent_tids}->{consequent_tids}")
