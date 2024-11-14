@@ -1,12 +1,13 @@
+import math
+
 import pandas as pd
 from eclat import Eclat
-transactions = [
-    ['A', 'B', 'D'],
-    ['B', 'C', 'E'],
-    ['A', 'B', 'C', 'E'],
-    ['B', 'E'],
-    ['A', 'B', 'C', 'E'],
-]
+excel_file = "trans.xlsx"
+
+transactions =pd.read_csv
+data = pd.read_excel(excel_file, header=None)
+
+transactions = data.values.tolist()
 
 min_support = 2
 

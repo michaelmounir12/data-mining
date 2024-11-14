@@ -12,6 +12,8 @@ class Eclat:
         vertical_db = defaultdict(set)
         for tid, items in enumerate(self.transactions):
             for item in items:
+                if isinstance(item,float):
+                    continue
                 vertical_db[item].add(tid)
         self.vertical_items = vertical_db
         for item, tids in vertical_db.items():
