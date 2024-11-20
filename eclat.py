@@ -7,6 +7,7 @@ class Eclat:
         self.transactions = transactions
         self.frequent_items = []
         self.vertical_items = defaultdict(set)
+        self.fit()
 
     def fit(self):
         vertical_db = defaultdict(set)
@@ -30,7 +31,7 @@ class Eclat:
                     self.generate_frequent(items | {new_item}, intersection)
 
     def get_frequent(self):
-        self.fit()
+        
         return self.frequent_items
 
 
