@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 class Eclat:
     def __init__(self, min_sup, min_conf, transactions):
         self.min_sup = min_sup
@@ -7,12 +8,13 @@ class Eclat:
         self.transactions = transactions
         self.frequent_items = []
         self.vertical_items = defaultdict(set)
+        self.fit()
 
     def fit(self):
         vertical_db = defaultdict(set)
         for tid, items in enumerate(self.transactions):
             for item in items:
-                if isinstance(item,float):
+                if isinstance(item, float):
                     continue
                 vertical_db[item].add(tid)
         self.vertical_items = vertical_db
@@ -30,15 +32,14 @@ class Eclat:
                     self.generate_frequent(items | {new_item}, intersection)
 
     def get_frequent(self):
-        self.fit()
         return self.frequent_items
 
     def calculate_confidence(self):
-        confidence_values = []  
+        confidence_values = []
 
-        for items, tids in frequent_items:
+        for items, tids in self.frequent_items:
             if len(items) == 1:
-                continue  
+                continue
         for antecedent in items:
             consequent = items - {antecedent}
             antecedent_tids = self.vertical_items[antecedent]
@@ -47,7 +48,7 @@ class Eclat:
             confidence = len(intersection) / len(antecedent_tids) if len(antecedent_tids) > 0 else 0
             confidence_values.append((({antecedent}), (consequent), confidence))
         return confidence_values
-    
+
     def association_representation(self):
         association_rules = []
         for items, tids in self.frequent_items:
@@ -55,5 +56,22 @@ class Eclat:
                 for antecedent in items:
                     consequent = items - {antecedent}
                     antecedent_tids = self.vertical_items[antecedent]
-                    consequent_tids = self.vertical_items[(consequent)]
+                    consequent_tids = self.vertical_items[consequent]
                     print(f"{antecedent_tids}->{consequent_tids}")
+
+    def calculate_lift(self):
+        num_of_trans = len(self.transactions)
+        lift_values = []
+        for items, tids in self.frequent_items:
+            if len(items) > 1:
+                for antecedent in items:
+                    consequent = items - {antecedent}
+                    # calc support
+                    supp_a = len(self.vertical_items[antecedent]) / num_of_trans
+                    supp_b = len(set.intersection(*[self.vertical_items[item] for item in consequent])) / num_of_trans
+                    supp_ab = len(tids) / num_of_trans
+                    # calc lift
+                    lift = supp_ab / (supp_b * supp_a) if supp_b > 0 and supp_a > 0 else 0
+
+                    lift_values.append(({antecedent}, consequent, lift))
+        return lift_values

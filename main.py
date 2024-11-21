@@ -2,9 +2,10 @@ import math
 
 import pandas as pd
 from eclat import Eclat
+
 excel_file = "trans.xlsx"
 
-transactions =pd.read_csv
+transactions = pd.read_csv
 data = pd.read_excel(excel_file, header=None)
 
 transactions = data.values.tolist()
@@ -19,6 +20,10 @@ for item in items:
 frequent_itemsets = eclat_instance.get_frequent()
 print("Frequent Itemsets:", frequent_itemsets)
 
+lift_values = eclat_instance.calculate_lift()
+print("lift values : ")
+for antecedent, consequent, lift in lift_values:
+    print(f"Antecedent: {antecedent}, Consequent: {consequent}, Lift: {lift}")
 
 eclat_instance.association_representation()
 
