@@ -3,22 +3,24 @@ import pandas as pd
 from collections import defaultdict
 import matplotlib.pyplot as plt
 
+
 class Eclat:
     def __init__(self, min_sup, min_conf, transactions):
-        self.min_sup = min_sup
+      #  print(len(transactions))
+        self.min_sup = int(min_sup * len(transactions))
         self.min_conf = min_conf
         self.transactions = transactions
         self.frequent_itemsets = defaultdict(list)
         self.vertical_items = defaultdict(set)
-        self.fit()
+        self.DFS()
 
     def calc(self, tids):
-        print("len",len(self.transactions))
+        # print("len",len(self.transactions))
         return len(tids) / len(self.transactions) if len(self.transactions) > 0 else 0
 
-    def fit(self):
+    def DFS(self):  # convert to vertical and generate freq using using dfs algo
         vertical_db = defaultdict(set)
-        for tid, items in enumerate(self.transactions):
+        for tid, items in enumerate(self.transactions, start=1):
             for item in items:
                 if isinstance(item, float):
                     continue
@@ -50,9 +52,9 @@ class Eclat:
                 continue
 
             for items, tids in itemsets:
-                if items=={'K','M'}:
-                    print("check")
-                    print(items , tids)
+                # if items=={'K','M'}:
+                #     print("check")
+                #     print(items , tids)
                 items_set = set(items)
                 for antecedent in items_set:
                     consequent = items_set - {antecedent}
@@ -68,30 +70,33 @@ class Eclat:
         return lift_values
 
     def calculate_strong_rules(self):
-      strong_rules = []
+        strong_rules = []
 
-      for size, itemsets in self.frequent_itemsets.items():
-          if size == 1:
-              continue
+        for size, itemsets in self.frequent_itemsets.items():
+            if size == 1:
+                continue
 
-          for items, tids in itemsets:
-              items_set = set(items)
-              for antecedent in items_set:
-                  consequent = items_set - {antecedent}
+            for items, tids in itemsets:
+                items_set = set(items)
+                for antecedent in items_set:
+                    consequent = items_set - {antecedent}
 
-                  if not consequent:
-                      continue
+                    if not consequent:
+                        continue
 
-                  antecedent_tids = self.vertical_items[antecedent]
-                  consequent_tids = set.union(*[self.vertical_items[item] for item in consequent])
+                    antecedent_tids = self.vertical_items[antecedent]
+                    consequent_tids = set.intersection(*[self.vertical_items[item] for item in consequent])
+                  #  print("ant ids ",antecedent_tids)
+                  #  print("cont ids " , consequent_tids)
 
-                  intersection = antecedent_tids.intersection(consequent_tids)
-                  confidence = len(intersection) / len(antecedent_tids) if len(antecedent_tids) > 0 else 0
+                    intersection = antecedent_tids.intersection(consequent_tids)
+                   # print("int ids ", intersection)
+                    confidence = len(intersection) / len(antecedent_tids) if len(antecedent_tids) > 0 else 0
 
-                  if confidence >= self.min_conf :
-                      strong_rules.append((frozenset([antecedent]), frozenset(consequent), confidence, lift))
+                    if confidence >= self.min_conf:
+                        strong_rules.append((frozenset([antecedent]), frozenset(consequent), confidence))
 
-      return strong_rules
+        return strong_rules
 
 
 excel_file = "trans.xlsx"
@@ -99,13 +104,12 @@ df = pd.read_excel(excel_file, header=None, skiprows=1, names=['TiD', 'items'])
 
 df['items'] = df['items'].apply(lambda x: x.split(',') if isinstance(x, str) else [])
 
-
 print("Transactions:")
 for tid, items in zip(df['TiD'], df['items']):
     print(f"TID {tid}: {items}")
 
-min_support = int(input("enter min support "))
-min_confidence =  float(input("enter min confidence "))
+min_support = float(input("enter min support "))
+min_confidence = float(input("enter min confidence "))
 transactions = df['items'].tolist()
 
 eclat = Eclat(min_support, min_confidence, transactions)
@@ -124,8 +128,8 @@ for antecedent, consequent, lift in lift_values:
 
 strong_rules = eclat.calculate_strong_rules()
 print("\nStrong Association Rules:")
-for antecedent, consequent, confidence, lift in strong_rules:
-    print(f"Rule: {antecedent} -> {consequent}, Confidence: {confidence:.2f}, Lift: {lift:.2f}")
+for antecedent, consequent, confidence in strong_rules:
+    print(f"Rule: {antecedent} -> {consequent}, Confidence: {confidence:.2f}")
 
 itemsets_df = pd.DataFrame(
     [(frozenset(item), len(tids)) for size, itemsets in frequent_itemsets.items() for item, tids in itemsets],
